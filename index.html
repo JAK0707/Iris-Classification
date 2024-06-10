@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Iris Classification</title>
+</head>
+<body>
+    <h1>Iris Classification</h1>
+    <form id="classificationForm">
+        <label for="sepalLength">Sepal Length:</label>
+        <input type="number" id="sepalLength" name="sepalLength" step="any" required><br>
+        <label for="sepalWidth">Sepal Width:</label>
+        <input type="number" id="sepalWidth" name="sepalWidth" step="any" required><br>
+        <label for="petalLength">Petal Length:</label>
+        <input type="number" id="petalLength" name="petalLength" step="any" required><br>
+        <label for="petalWidth">Petal Width:</label>
+        <input type="number" id="petalWidth" name="petalWidth" step="any" required><br>
+        <button type="submit">Classify</button>
+    </form>
+    <div id="classificationResult"></div>
+
+    <script>
+        document.getElementById('classificationForm').addEventListener('submit', function(event) {
+            event.preventDefault();
+            var sepalLength = document.getElementById('sepalLength').value;
+            var sepalWidth = document.getElementById('sepalWidth').value;
+            var petalLength = document.getElementById('petalLength').value;
+            var petalWidth = document.getElementById('petalWidth').value;
+
+            var inputData = [parseFloat(sepalLength), parseFloat(sepalWidth), parseFloat(petalLength), parseFloat(petalWidth)];
+
+            fetch('/predict', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ input: inputData })
+            })
+            .then(response => response.json())
+            .then(data => {
+                document.getElementById('classificationResult').innerText = 'Predicted Iris Species: ' + data.prediction;
+            })
+            .catch(error => console.error('Error:', error));
+        });
+    </script>
+</body>
+</html>
