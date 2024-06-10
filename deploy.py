@@ -1,38 +1,31 @@
-from flask import Flask, request, render_template
-import numpy as np
-from sklearn.preprocessing import StandardScaler
-import joblib as joblib
-import os
+from flask import Flask, render_template, request
+import pickle
 
-model = joblib.load('saved_model1.pkl')
-scaler = joblib.load('scaler.save')
-
+# Initialize the Flask application
 app = Flask(__name__)
 
-IMG_FOLDER = os.path.join('static', 'IMG')
-app.config['UPLOAD_FOLDER'] = IMG_FOLDER
-
+# Load the saved model
+model = pickle.load(open('saved_model.sav', 'rb'))
 
 @app.route('/')
-def index():
-    return render_template('index.html')
-
-
-@app.route('/', methods=['GET', 'POST'])
 def home():
-    if request.method == 'POST':
-        sl = request.form['SepalLength']
-        sw = request.form['SepalWidth']
-        pl = request.form['PetalLength']
-        pw = request.form['PetalWidth']
-        data = np.array([[sl, sw, pl, pw]], dtype=float)
-        x = scaler.transform(data)
-        prediction = model.predict(x)
-        image = prediction[0] + '.png'
-        image = os.path.join(app.config['UPLOAD_FOLDER'], image)
-        return render_template('index.html', prediction=prediction[0], image=image)
-    return render_template('index.html')
+    result = ''
+    return render_template('index.html',**locals())
 
+@app.route('/predict', methods=['POST', 'GET'])
+def predict():
+    # Get the user input
+    sepal_length = float(request.form['sepal_length'])
+    sepal_width = float(request.form['sepal_width'])
+    petal_length = float(request.form['petal_length'])
+    petal_width = float(request.form['petal_width'])
+
+    # Make a prediction using the model
+    result = model.predict([[sepal_length, sepal_width, petal_length, petal_width]])
+
+    # Render the prediction template with the results
+    return render_template('index.html', **locals())
 
 if __name__ == '__main__':
-    app.run(debug=True, host='0.0.0.0', port=8080)
+    # Run the Flask app in debug mode
+    app.run(debug=True)
